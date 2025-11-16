@@ -1,0 +1,71 @@
+/* Variables globales - Modo Día */
+:root {
+  --color-bg: #ffffff;
+  --color-bg-alt: #f3f4f6;
+  --color-text: #111827;
+  --color-text-muted: #4b5563;
+
+  --color-green: #1B7A3F;
+  --color-red: #D62828;
+  --color-gold: #F6C90E;
+
+  --color-border: #e5e7eb;
+  --color-card: #ffffff;
+}
+
+/* Modo Noche */
+[data-theme="dark"] {
+  --color-bg: #111827;
+  --color-bg-alt: #1F2937;
+  --color-text: #F9FAFB;
+  --color-text-muted: #9CA3AF;
+
+  --color-green: #22C55E;
+  --color-red: #EF4444;
+  --color-gold: #FACC15;
+
+  --color-border: #374151;
+  --color-card: #1F2937;
+}
+
+/* Aplicaciones básicas */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+header, nav, footer {
+  background-color: var(--color-bg-alt);
+  color: var(--color-text);
+}
+
+button {
+  background-color: var(--color-green);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  transition: background 0.3s ease;
+}
+button:hover {
+  background-color: var(--color-red);
+}
+
+.card {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+input {
+  background-color: var(--color-bg-alt);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.5rem;
+}
+input:focus {
+  border-color: var(--color-green);
+  outline: none;
+}
