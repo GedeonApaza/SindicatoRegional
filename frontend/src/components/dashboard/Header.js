@@ -16,7 +16,8 @@ import {
   Container,
   Paper,
   Fade,
-  Tooltip
+  Tooltip,
+  Skeleton
 } from '@mui/material';
 import {
   AccountCircle,
@@ -26,7 +27,7 @@ import {
 } from '@mui/icons-material';
 import VerPerfil from './VerPerfil'; 
 
-const Header = ({ colors, activeView, menuItems,id ,name, fotoPerfil, logout, token, axiosJWT }) => {
+const Header = ({ colors, activeView, menuItems, user, logout, token, axiosJWT }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const theme = useTheme();
   const [openPerfil, setOpenPerfil] = useState(false);
@@ -45,8 +46,8 @@ const Header = ({ colors, activeView, menuItems,id ,name, fotoPerfil, logout, to
   };
 
   const handleViewProfile = () => {
-  handleProfileMenuClose();
-  setOpenPerfil(true);
+    handleProfileMenuClose();
+    setOpenPerfil(true);
   };
   
   const handleSettings = () => {
@@ -63,6 +64,46 @@ const Header = ({ colors, activeView, menuItems,id ,name, fotoPerfil, logout, to
     dark: colors?.dark || '#333333',
     danger: colors?.danger || '#d32f2f'
   };
+
+  // ✅ VALIDACIÓN: Si no hay usuario, mostrar skeleton
+  if (!user) {
+    return (
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          bgcolor: 'background.paper',
+          borderRadius: { xs: 0, md: 3 },
+          m: { xs: 0, md: 2 },
+          overflow: 'hidden'
+        }}
+      >
+        <Container maxWidth="xl" sx={{ px: { xs: 2, md: 4 } }}>
+          <Toolbar 
+            sx={{ 
+              minHeight: { xs: 80, md: 100 },
+              px: 0,
+              justifyContent: 'space-between'
+            }}
+          >
+            {/* Skeleton para el título */}
+            <Box sx={{ flex: 1 }}>
+              <Skeleton variant="text" width={200} height={40} />
+              <Skeleton variant="text" width={300} height={20} sx={{ mt: 1 }} />
+            </Box>
+
+            {/* Skeleton para el avatar */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ textAlign: 'right', display: { xs: 'none', md: 'block' } }}>
+                <Skeleton variant="text" width={120} height={20} />
+                <Skeleton variant="text" width={80} height={16} />
+              </Box>
+              <Skeleton variant="circular" width={48} height={48} />
+            </Box>
+          </Toolbar>
+        </Container>
+      </Paper>
+    );
+  }
 
   return (
     <>
@@ -108,7 +149,8 @@ const Header = ({ colors, activeView, menuItems,id ,name, fotoPerfil, logout, to
                     fontSize: { sm: '0.875rem', md: '1rem' }
                   }}
                 >
-                  Bienvenido {name}, al sistema de gestión del sindicato
+                  {/* ✅ auth()->user->nombre_completo */}
+                  Bienvenido {user.nombre_completo || 'Usuario'}, al sistema de gestión del sindicato
                 </Typography>
               </Box>
             </Box>
@@ -121,7 +163,8 @@ const Header = ({ colors, activeView, menuItems,id ,name, fotoPerfil, logout, to
                 display: { xs: 'none', md: 'block' }
               }}>
                 <Typography variant="body2" fontWeight={500} color={headerColors.dark}>
-                  {name}
+                  {/* ✅ auth()->user->nombre_completo */}
+                  {user.nombre_completo || 'Usuario'}
                 </Typography>
                 <Typography variant="caption" color="success.main">
                   En línea
@@ -129,7 +172,7 @@ const Header = ({ colors, activeView, menuItems,id ,name, fotoPerfil, logout, to
               </Box>
 
               {/* Avatar con Badge de estado */}
-              <Tooltip title={`Usuario: ${name}`} placement="bottom">
+              <Tooltip title={`Usuario: ${user.nombre_completo || 'Usuario'}`} placement="bottom">
                 <IconButton
                   size="large"
                   edge="end"
@@ -179,8 +222,8 @@ const Header = ({ colors, activeView, menuItems,id ,name, fotoPerfil, logout, to
                     }}
                   >
                     <Avatar
-                      src={`http://localhost:5000${fotoPerfil}`}
-                      alt={name}
+                      src={user.foto_perfil ? `http://localhost:5000${user.foto_perfil}` : ''} 
+                      alt={user.nombre_completo || 'Usuario'}
                       sx={{
                         width: { xs: 44, md: 48 },
                         height: { xs: 44, md: 48 },
@@ -189,7 +232,8 @@ const Header = ({ colors, activeView, menuItems,id ,name, fotoPerfil, logout, to
                         border: '2px solid rgba(255,255,255,0.2)'
                       }}
                     >
-                      <AccountCircle sx={{ fontSize: { xs: 24, md: 26 } }} />
+                      {/* ✅ Fallback si no hay foto */}
+                      {user.nombre_completo?.charAt(0) || <AccountCircle sx={{ fontSize: { xs: 24, md: 26 } }} />}
                     </Avatar>
                   </Badge>
                 </IconButton>
@@ -246,11 +290,12 @@ const Header = ({ colors, activeView, menuItems,id ,name, fotoPerfil, logout, to
                   background: `linear-gradient(135deg, ${headerColors.primary}, ${headerColors.secondary})`,
                 }}
               >
-                <AccountCircle sx={{ fontSize: 18 }} />
+                {user.nombre_completo?.charAt(0) || <AccountCircle sx={{ fontSize: 18 }} />}
               </Avatar>
               <Box>
                 <Typography variant="subtitle2" fontWeight={600}>
-                  {name}
+                  {/* ✅ auth()->user->nombre_completo */}
+                  {user.nombre_completo || 'Usuario'}
                 </Typography>
                 <Typography variant="caption" color="success.main">
                   En línea
@@ -286,15 +331,17 @@ const Header = ({ colors, activeView, menuItems,id ,name, fotoPerfil, logout, to
           </MenuItem>
         </Menu>
       </Paper>
-<VerPerfil 
-  open={openPerfil} 
-  onClose={() => setOpenPerfil(false)} 
-  userId={id} // 
-  token={token}          
-  axiosJWT={axiosJWT}   
-/>
 
-
+      {/* ✅ Solo abrir el modal si user existe */}
+      {user && (
+        <VerPerfil 
+          open={openPerfil} 
+          onClose={() => setOpenPerfil(false)} 
+          userId={user.id_usuario} 
+          token={token}          
+          axiosJWT={axiosJWT}   
+        />
+      )}
     </>
   );
 };

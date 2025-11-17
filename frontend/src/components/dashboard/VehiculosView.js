@@ -12,17 +12,20 @@ import CrearVehiculo from '../forms/CrearVehiculo';
 import EditarVehiculo from '../forms/EditarVehiculo';
 import VerDetalles from '../modals/VerDetalles';
 import { vehiculoDetallesConfig } from '../configs/vehiculoDetallesConfig';
+import { useDashboardData } from '../../context/DashboardDataContext';
 
-const VehiculosView = ({ 
-  theme, 
-  vehiculos, 
-  conductores, 
-  handleCreateVehiculo,
-  handleEditVehiculo,
-  handleDeleteVehiculo,
-  handleViewVehiculo,
-  handleChangeEstado
-}) => {
+const VehiculosView = ({ theme }) => {
+  const {
+    vehiculos,
+    conductores,
+    handlers
+  } = useDashboardData();
+  const {
+    handleCreateVehiculo,
+    handleEditVehiculo,
+    handleDeleteVehiculo
+  } = handlers;
+
   // TODOS LOS ESTADOS NECESARIOS
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);

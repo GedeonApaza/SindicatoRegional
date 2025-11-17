@@ -19,17 +19,88 @@ import {
 import { NotificationsActive as NotificationsIcon } from '@mui/icons-material';
 import StatsCards from '../StatsCards.js';
 import AlertModal from '../modals/AlertModal.js'; 
+import { useDashboardData } from '../../context/DashboardDataContext';
 
 const DashboardHome = ({ 
   theme, 
   alertas, 
-  viajes, 
+  viajes: legacyViajes = [], 
   setActiveView,
   showNewAlertModal,
   newAlertas,
   handleCloseAlertModal,
   handleOpenAlertModal  // AGREGAR ESTA PROP
 }) => {
+  const {
+    viajes: contextViajes = legacyViajes,
+    vehiculos = [],
+    conductores = [],
+    pasajerosViajes = []
+  } = useDashboardData();
+
+  const viajes = contextViajes && contextViajes.length ? contextViajes : legacyViajes;
+
+  const getVehiculoById = (idVehiculo) =>
+    vehiculos.find((vehiculo) => vehiculo.id_vehiculo === idVehiculo);
+
+  const getConductorName = (viaje) => {
+    const vehiculo = getVehiculoById(viaje.id_vehiculo);
+    if (!vehiculo) return 'Sin asignar';
+    const conductor = conductores.find(
+      (item) => item.conductor?.id_conductor === vehiculo.id_conductor
+    );
+    return conductor?.usuario?.nombre_completo || 'Sin asignar';
+  };
+
+  const getPasajerosAsignados = (viaje) => {
+    if (Array.isArray(viaje.pasajeros)) {
+      return viaje.pasajeros.length;
+    }
+    const viajeId = viaje.id_viaje ?? viaje.id;
+    return pasajerosViajes.filter((pv) => pv.id_viaje === viajeId).length;
+  };
+
+  const getCapacidadTotal = (viaje) => {
+    const vehiculo = getVehiculoById(viaje.id_vehiculo);
+    return (
+      vehiculo?.capacidad_pasajeros ||
+      viaje.capacidad_pasajeros ||
+      0
+    );
+  };
+
+  const formatHoraSalida = (viaje) => {
+    const horaBase = viaje.hora_salida || viaje.fecha_salida_real || viaje.fecha_inicio;
+    const ocupados = getPasajerosAsignados(viaje);
+    const capacidad = getCapacidadTotal(viaje);
+    const viajeLleno = capacidad > 0 && ocupados >= capacidad;
+
+    if (!horaBase) {
+      return viajeLleno ? 'Listo · capacidad completa' : 'Pendiente';
+    }
+
+    let fechaHora;
+    if (viaje.hora_salida) {
+      const horaStr = viaje.hora_salida.length === 5
+        ? `${viaje.hora_salida}:00`
+        : viaje.hora_salida;
+      fechaHora = new Date(`1970-01-01T${horaStr}`);
+    } else {
+      fechaHora = new Date(horaBase);
+    }
+
+    if (Number.isNaN(fechaHora.getTime())) {
+      return viajeLleno ? `${horaBase} · Listo` : horaBase;
+    }
+
+    const horaFormateada = fechaHora.toLocaleTimeString('es-BO', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    return viajeLleno ? `${horaFormateada} · Listo para salir` : `${horaFormateada} · Programado`;
+  };
+
   return (
     <Box sx={{ width: '100%', px: 2 }}>
       {/*  USO DEL COMPONENTE AlertModal */}
@@ -133,30 +204,53 @@ const DashboardHome = ({
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {viajes.slice(0, 5).map((viaje) => (
-                      <TableRow key={viaje.id} hover>
-                        <TableCell>{viaje.ruta}</TableCell>
-                        <TableCell>{viaje.id_conductor}</TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={viaje.pasajeros}
-                            size="small"
-                            sx={{ bgcolor: theme.background }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={viaje.estado}
-                            size="small"
-                            color={
-                              viaje.estado === 'Completado' ? 'success' :
-                              viaje.estado === 'En curso' ? 'warning' : 'default'
-                            }
-                          />
-                        </TableCell>
-                        <TableCell sx={{ color: theme.muted }}>{viaje.hora}</TableCell>
-                      </TableRow>
-                    ))}
+                    {viajes.slice(0, 5).map((viaje) => {
+                      const viajeId = viaje.id_viaje ?? viaje.id;
+                      const pasajerosAsignados = getPasajerosAsignados(viaje);
+                      const capacidad = getCapacidadTotal(viaje);
+                      const viajeLleno = capacidad > 0 && pasajerosAsignados >= capacidad;
+
+                      return (
+                        <TableRow key={viajeId} hover>
+                          <TableCell>{`${viaje.origen} → ${viaje.destino}`}</TableCell>
+                          <TableCell>{getConductorName(viaje)}</TableCell>
+                          <TableCell>
+                            <Chip 
+                              label={
+                                capacidad
+                                  ? `${pasajerosAsignados}/${capacidad}`
+                                  : `${pasajerosAsignados}`
+                              }
+                              size="small"
+                              color={viajeLleno ? 'success' : 'default'}
+                              sx={{ fontWeight: 600 }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Chip 
+                              label={viaje.estado?.replace(/_/g, ' ') || 'Programado'}
+                              size="small"
+                              color={(() => {
+                                const estado = viaje.estado?.toLowerCase();
+                                switch (estado) {
+                                  case 'programado':
+                                    return 'info';
+                                  case 'en_ruta':
+                                    return 'warning';
+                                  case 'finalizado':
+                                    return 'success';
+                                  case 'cancelado':
+                                    return 'error';
+                                  default:
+                                    return 'default';
+                                }
+                              })()}
+                            />
+                          </TableCell>
+                          <TableCell sx={{ color: theme.muted }}>{formatHoraSalida(viaje)}</TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </TableContainer>

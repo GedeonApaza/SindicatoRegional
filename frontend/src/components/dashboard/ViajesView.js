@@ -12,16 +12,20 @@ import CrearViaje from '../forms/CrearViaje';
 import EditarViaje from '../forms/EditarViaje';
 import VerDetalles from '../modals/VerDetalles';
 import { viajeDetallesConfig } from '../configs/viajeDetallesConfig';
+import { useDashboardData } from '../../context/DashboardDataContext';
 
-const ViajesView = ({ 
-  theme, 
-  viajes, 
-  vehiculos, 
-  conductores, 
-  handleCreateViaje, 
-  handleEditViaje,
-  handleDeleteViaje 
-}) => {
+const ViajesView = ({ theme }) => {
+  const {
+    viajes,
+    vehiculos,
+    conductores,
+    handlers
+  } = useDashboardData();
+  const {
+    handleCreateViaje,
+    handleEditViaje,
+    handleDeleteViaje
+  } = handlers;
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);

@@ -91,11 +91,34 @@ export const getUserById = async (req, res) => {
   }
 };
 
+
 export const getUsers = async (req, res) => {
   try {
     const users = await Users.findAll({
-      attributes: ['id_usuario','ci','nombre_completo','apellido_paterno','apellido_materno','email','id_rol','estado']
+      attributes: [
+        'id_usuario',
+        'ci',
+        'nombre_completo',
+        'apellido_paterno',
+        'apellido_materno',
+        'email',
+        'foto_perfil',        // ✅ Agregar si la usas
+        'id_rol',
+        'estado',
+        'is2FAEnabled',       // ✅ Agregar si la usas
+        'fecha_creacion',     // ✅ Para mostrar en el modal
+        'fecha_modificacion',
+        'fecha_eliminacion'
+      ],
+      // ✅ 2. AGREGAR INCLUDE para traer el ROL completo
+      include: [{
+        model: Roles,
+        as: 'rol',  // ✅ IMPORTANTE: Debe coincidir con el alias en el modelo
+        attributes: ['id_rol', 'nombre_rol', 'descripcion']
+      }],
+      order: [['fecha_creacion', 'DESC']] // ✅ Opcional: ordenar por más recientes
     });
+    
     res.status(200).json(users);
   } catch (error) {
     console.log(error);
@@ -239,7 +262,11 @@ export const setup2FA = async (req, res) => {
 // LOGIN
 export const Login = async (req, res) => {
   try {
-    const user = await Users.findOne({ where: { email: req.body.email } });
+    const user = await Users.findOne({ where: { email: req.body.email },      include: [{
+        model: Roles,
+        as: 'rol', // ✅ AHORA PUEDES HACER: user.rol.nombre_rol
+        attributes: ['id_rol', 'nombre_rol', 'descripcion'] // Solo lo que necesitas
+      }] });
     if (!user) return res.status(404).json({ msg: "Email no encontrado" });
 
     const match = await bcrypt.compare(req.body.password, user.password);
@@ -254,7 +281,11 @@ export const Login = async (req, res) => {
 
     // Normal login (sin 2FA)
     const accessToken = jwt.sign(
-      { id_usuario: user.id_usuario, nombre_completo:user.nombre_completo,apellido_paterno:user.apellido_paterno, apellido_materno: user.apellido_materno , email: user.email, rol: user.id_rol,foto_perfil:user.foto_perfil },
+      { id_usuario: user.id_usuario, nombre_completo:user.nombre_completo,apellido_paterno:user.apellido_paterno, apellido_materno: user.apellido_materno , email: user.email,         rol: {
+          id_rol: user.rol.id_rol,
+          nombre_rol: user.rol.nombre_rol, // ✅ COMO LARAVEL!
+          descripcion: user.rol.descripcion
+        },foto_perfil:user.foto_perfil },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "15m" }
     );

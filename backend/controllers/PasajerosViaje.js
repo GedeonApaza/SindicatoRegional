@@ -83,12 +83,17 @@ export const createPasajeroViaje = async (req, res) => {
 
     if (totalActual < vehiculo.capacidad_pasajeros) {
       // Todavía hay asientos disponibles
-      if (viaje.estado !== "en_proceso") {
-        await viaje.update({ estado: "en_proceso" });
+      if (viaje.estado !== "programado") {
+        await viaje.update({ estado: "programado" });
       }
     } else if (totalActual === vehiculo.capacidad_pasajeros) {
       // Ya se llenaron todos los asientos
-      await viaje.update({ estado: "registrado" });
+  const now = new Date();
+  const horaActual = now.toTimeString().slice(0,5); // "HH:MM"
+  
+      await viaje.update({ estado: "en_ruta",
+        hora_salida: horaActual 
+       });
     }
 
     res.status(201).json({

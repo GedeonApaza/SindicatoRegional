@@ -9,8 +9,11 @@ import {
 import { Security as SecurityIcon } from '@mui/icons-material';
 import ListaRoles from '../tables/ListaRoles';
 import CrearRol from '../forms/CrearRol';
+import { useDashboardData } from '../../context/DashboardDataContext';
 
-const RolesView = ({ theme, roles, handleDeleteRole, handleCreateRole }) => {
+const RolesView = ({ theme }) => {
+  const { roles, handlers } = useDashboardData();
+  const { handleDeleteRole, handleCreateRole } = handlers;
   const [showModal, setShowModal] = useState(false);
 
   return (

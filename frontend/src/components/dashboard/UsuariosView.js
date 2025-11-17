@@ -11,17 +11,16 @@ import ListaUsuarios from '../tables/ListaUsuarios';
 import CrearUsuario from '../forms/CrearUsuario';
 import EditarUsuario from '../forms/EditarUsuario';
 import VerUsuario from '../forms/VerUsuario';
+import { useDashboardData } from '../../context/DashboardDataContext';
 
-const UsuariosView = ({ 
-  theme, 
-  users, 
-  roles, 
-  handleCreateUser, 
-  handleDeleteUser,
-  handleActivateUser,
-  handleEditUser,
-  handleViewUser  
-}) => {
+const UsuariosView = ({ theme }) => {
+  const { users, roles, handlers } = useDashboardData();
+  const {
+    handleCreateUser,
+    handleDeleteUser,
+    handleActivateUser,
+    handleEditUser,
+  } = handlers;
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);

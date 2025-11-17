@@ -26,7 +26,7 @@ import {
 const VerUsuario = ({ usuario, show, onClose, colors }) => {
   if (!usuario) return null;
 
-  console.log("DEBUG USUARIO:", usuario);
+  //console.log("DEBUG USUARIO:", usuario);
   const InfoRow = ({ icon, label, value }) => (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5 }}>
       <Box sx={{ 
@@ -80,7 +80,7 @@ const VerUsuario = ({ usuario, show, onClose, colors }) => {
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Avatar
-            src={usuario.foto_perfil}
+            src={usuario.foto_perfil ? `http://localhost:5000${usuario.foto_perfil}` : ''}  
             sx={{ 
               width: 50, 
               height: 50,
@@ -195,7 +195,7 @@ const VerUsuario = ({ usuario, show, onClose, colors }) => {
                 <InfoRow
                   icon={<SecurityIcon />}
                   label="Rol"
-                  value={usuario.id_rol || 'Sin rol asignado'}
+                  value={usuario.rol.nombre_rol || 'Sin rol asignado'}
                 />
               </Grid>
 

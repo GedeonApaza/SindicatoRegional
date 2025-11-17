@@ -12,16 +12,19 @@ import CrearConductor from '../forms/CrearConductor';
 import EditarConductor from '../forms/EditarConductor';
 import VerDetalles from '../modals/VerDetalles';
 import { conductorDetallesConfig } from '../configs/conductorDetallesConfig';
+import { useDashboardData } from '../../context/DashboardDataContext';
 
-const ConductoresView = ({ 
-  theme, 
-  conductores, 
-  roles, 
-  handleCreateConductor,
-  handleEditConductor,
-  handleViewConductor,
-  handleDeleteConductor
-}) => {
+const ConductoresView = ({ theme }) => {
+  const {
+    conductores,
+    roles,
+    handlers
+  } = useDashboardData();
+  const {
+    handleCreateConductor,
+    handleEditConductor,
+    handleDeleteConductor
+  } = handlers;
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetalles, setShowDetalles] = useState(false);

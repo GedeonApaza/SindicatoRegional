@@ -9,16 +9,20 @@ import {
 import { PersonAddAlt1 as PersonAddIcon } from '@mui/icons-material';
 import ListaPasajerosViajes from '../tables/ListaPasajerosViajes';
 import CrearPasajeroViaje from '../forms/CrearPasajeroViaje';
+import { useDashboardData } from '../../context/DashboardDataContext';
 
-const PasajerosViajesView = ({ 
-  theme, 
-  pasajerosViajes,
-  pasajeros, 
-  viajes,
-  vehiculos,
-  handleCreatePasajeroViaje, 
-  handleDeletePasajeroViaje 
-}) => {
+const PasajerosViajesView = ({ theme }) => {
+  const {
+    pasajerosViajes,
+    pasajeros,
+    viajes,
+    vehiculos,
+    handlers
+  } = useDashboardData();
+  const {
+    handleCreatePasajeroViaje,
+    handleDeletePasajeroViaje
+  } = handlers;
   const [showModal, setShowModal] = useState(false);
 
   return (

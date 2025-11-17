@@ -22,15 +22,10 @@ export const viajeDetallesConfig = {
       color: 'info', 
       icon: <ScheduleIcon /> 
     },
-    'en_proceso': { 
-      label: 'En Proceso', 
+    'en_ruta': { 
+      label: 'En ruta', 
       color: 'warning', 
       icon: <PlayIcon /> 
-    },
-    'registrado': { 
-      label: 'Registrado', 
-      color: 'success', 
-      icon: <CheckIcon /> 
     },
     'finalizado': { 
       label: 'Finalizado', 

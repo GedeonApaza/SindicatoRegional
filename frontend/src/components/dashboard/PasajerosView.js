@@ -6,8 +6,15 @@ import EditarPasajero from '../forms/EditarPasajero';
 import CrearPasajero from '../forms/CrearPasajero';
 import VerDetalles from '../modals/VerDetalles';
 import { pasajeroDetallesConfig } from '../configs/pasajeroDetallesConfig';
+import { useDashboardData } from '../../context/DashboardDataContext';
 
-const PasajerosView = ({ theme, pasajeros, handleCreatePasajero, handleEditPasajero, handleDeletePasajero }) => {
+const PasajerosView = ({ theme }) => {
+  const { pasajeros, handlers } = useDashboardData();
+  const {
+    handleCreatePasajero,
+    handleEditPasajero,
+    handleDeletePasajero
+  } = handlers;
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetalles, setShowDetalles] = useState(false);

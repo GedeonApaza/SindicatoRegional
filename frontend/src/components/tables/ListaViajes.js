@@ -56,8 +56,7 @@ const ListaViajes = ({
   const getEstadoColor = (estado) => {
     switch(estado?.toLowerCase()) {
       case 'programado': return 'info';
-      case 'en_proceso': return 'warning';
-      case 'registrado': return 'success';
+      case 'en_ruta': return 'warning';
       case 'finalizado': return 'success';
       case 'cancelado': return 'error';
       default: return 'default';
@@ -68,8 +67,7 @@ const ListaViajes = ({
   const getEstadoIcon = (estado) => {
     switch(estado?.toLowerCase()) {
       case 'programado': return <ScheduleIcon sx={{ fontSize: 12 }} />;
-      case 'en_proceso': return <PlayIcon sx={{ fontSize: 12 }} />;
-      case 'registrado': return <CheckIcon sx={{ fontSize: 12 }} />;
+      case 'en_ruta': return <PlayIcon sx={{ fontSize: 12 }} />;
       case 'finalizado': return <CheckIcon sx={{ fontSize: 12 }} />;
       case 'cancelado': return <CancelIcon sx={{ fontSize: 12 }} />;
       default: return <CircleIcon sx={{ fontSize: 8 }} />;

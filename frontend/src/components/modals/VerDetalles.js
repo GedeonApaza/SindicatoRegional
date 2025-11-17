@@ -71,6 +71,19 @@ const VerDetalles = ({
     });
   };
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'No especificado';
+    return new Date(dateString).toLocaleString('es-BO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'America/La_Paz'
+    });
+  };
+
   // Obtener valor anidado del objeto
   const getValue = (obj, path) => {
     return path.split('.').reduce((acc, part) => acc?.[part], obj);
@@ -182,17 +195,20 @@ const VerDetalles = ({
                     
                     return (
                       <Grid item xs={12} sm={field.fullWidth ? 12 : 6} key={fieldIndex}>
-<InfoRow
-  icon={field.icon}
-  label={field.label}
-  value={fieldValue}
-  render={
-    field.render
-      ? (val) => field.render(val, data, helperFunctions.getConductorName)
-      : (field.type === 'date' ? formatDate : null)
-  }
-/>
-
+                        <InfoRow
+                          icon={field.icon}
+                          label={field.label}
+                          value={fieldValue}
+                          render={
+                            field.render
+                              ? (val) => field.render(val, data, helperFunctions.getConductorName)
+                              : field.type === 'date'
+                                ? formatDate
+                                : field.type === 'datetime'
+                                  ? formatDateTime
+                                  : null
+                          }
+                        />
                       </Grid>
                     );
                   })}

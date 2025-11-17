@@ -26,6 +26,14 @@ const viajes = db.define('viajes',{
       type: DataTypes.DATE,
       allowNull: true
     },
+    hora_salida: {
+      type: DataTypes.TIME,
+      allowNull: true
+    },
+    hora_llegada: {
+      type: DataTypes.TIME,
+      allowNull: true
+    },
     origen: {
       type: DataTypes.STRING(50),
       allowNull: true,
@@ -37,7 +45,7 @@ const viajes = db.define('viajes',{
       defaultValue: "Caranavi"
     },
     estado: {
-      type: DataTypes.ENUM('programado','en_proceso','finalizado','cancelado'),
+      type: DataTypes.ENUM('programado','en_ruta','finalizado','cancelado'),
       allowNull: true,
       defaultValue: "programado"
     }

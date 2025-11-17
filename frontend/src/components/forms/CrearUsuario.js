@@ -14,9 +14,14 @@ import {
   FormControl,
   InputLabel,
   Select,
-  Alert
+  Alert,
+  Avatar
 } from '@mui/material';
-import { Close as CloseIcon, PersonAdd as PersonAddIcon } from '@mui/icons-material';
+import { 
+  Close as CloseIcon, 
+  PersonAdd as PersonAddIcon,
+  CloudUpload as CloudUploadIcon
+} from '@mui/icons-material';
 
 const CrearUsuario = ({ colors, roles, onCreateUser, show, onClose }) => {
   const [newUser, setNewUser] = useState({
@@ -29,6 +34,10 @@ const CrearUsuario = ({ colors, roles, onCreateUser, show, onClose }) => {
     confPassword: '', 
     id_rol: ''
   });
+  
+  // ✅ AGREGAR ESTADO PARA LA FOTO
+  const [fotoPerfil, setFotoPerfil] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   
   const [errors, setErrors] = useState({});
 
@@ -55,12 +64,45 @@ const CrearUsuario = ({ colors, roles, onCreateUser, show, onClose }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // ✅ MANEJAR SELECCIÓN DE FOTO
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validar tipo de archivo
+      if (!file.type.startsWith('image/')) {
+        setErrors({ ...errors, foto: 'Solo se permiten imágenes' });
+        return;
+      }
+      
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors({ ...errors, foto: 'La imagen no debe superar 5MB' });
+        return;
+      }
+      
+      setFotoPerfil(file);
+      
+      // Crear preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+      
+      // Limpiar error de foto
+      if (errors.foto) {
+        setErrors({ ...errors, foto: '' });
+      }
+    }
+  };
+
   const handleSubmit = () => {
     if (!validateForm()) {
       return;
     }
     
-    onCreateUser(newUser);
+    // ✅ PASAR TANTO LOS DATOS COMO LA FOTO
+    onCreateUser(newUser, fotoPerfil);
     handleClose();
   };
 
@@ -75,13 +117,14 @@ const CrearUsuario = ({ colors, roles, onCreateUser, show, onClose }) => {
       confPassword: '', 
       id_rol: ''
     });
+    setFotoPerfil(null);
+    setPreviewUrl(null);
     setErrors({});
     onClose();
   };
 
   const handleInputChange = (field, value) => {
     setNewUser({ ...newUser, [field]: value });
-    // Limpiar error del campo cuando el usuario empiece a escribir
     if (errors[field]) {
       setErrors({ ...errors, [field]: '' });
     }
@@ -114,6 +157,55 @@ const CrearUsuario = ({ colors, roles, onCreateUser, show, onClose }) => {
       
       <DialogContent sx={{ pt: 3 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          
+          {/* ✅ SECCIÓN DE FOTO DE PERFIL */}
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+              Foto de Perfil (Opcional)
+            </Typography>
+            
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <Avatar
+                src={previewUrl}
+                sx={{
+                  width: 120,
+                  height: 120,
+                  bgcolor: colors?.primary || '#1976d2',
+                  fontSize: '3rem'
+                }}
+              >
+                {!previewUrl && newUser.nombre_completo?.charAt(0)}
+              </Avatar>
+              
+              <Button
+                component="label"
+                variant="outlined"
+                startIcon={<CloudUploadIcon />}
+                sx={{ borderRadius: '12px' }}
+              >
+                Seleccionar Foto
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </Button>
+              
+              {fotoPerfil && (
+                <Typography variant="caption" color="text.secondary">
+                  {fotoPerfil.name}
+                </Typography>
+              )}
+              
+              {errors.foto && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {errors.foto}
+                </Alert>
+              )}
+            </Box>
+          </Box>
+
           {/* Información Personal */}
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: -2 }}>
             Información Personal
@@ -288,7 +380,6 @@ const CrearUsuario = ({ colors, roles, onCreateUser, show, onClose }) => {
             </Grid>
           </Grid>
 
-          {/* Mostrar alerta si las contraseñas no coinciden */}
           {newUser.password && newUser.confPassword && newUser.password !== newUser.confPassword && (
             <Alert severity="error">
               Las contraseñas no coinciden

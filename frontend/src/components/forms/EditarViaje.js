@@ -278,10 +278,10 @@ const EditarViaje = ({ viaje, colors, vehiculos, conductores, onUpdateViaje, sho
                 Programado
               </Box>
             </MenuItem>
-            <MenuItem value="en_proceso">
+            <MenuItem value="en_ruta">
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'warning.main' }} />
-                En Proceso
+                En ruta
               </Box>
             </MenuItem>
             <MenuItem value="finalizado">

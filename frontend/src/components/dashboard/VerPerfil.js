@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Dialog, DialogTitle, DialogContent, Typography, Avatar, Box } from "@mui/material";
 
 const VerPerfil = ({ open, onClose, userId, token, axiosJWT }) => {

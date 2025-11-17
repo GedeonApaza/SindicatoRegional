@@ -18,7 +18,6 @@ import { Close as CloseIcon, DirectionsBus as BusIcon } from '@mui/icons-materia
 const CrearViaje = ({ colors, vehiculos, conductores, onCreateViaje, show, onClose }) => {
   const [newViaje, setNewViaje] = useState({
     id_vehiculo: '',
-    id_conductor: '',
     fecha_inicio: '',
     fecha_fin: '',
     origen: 'La Paz',
@@ -33,10 +32,6 @@ const CrearViaje = ({ colors, vehiculos, conductores, onCreateViaje, show, onClo
     
     if (!newViaje.id_vehiculo) {
       newErrors.id_vehiculo = 'Debe seleccionar un vehículo';
-    }
-    
-    if (!newViaje.id_conductor) {
-      newErrors.id_conductor = 'Debe seleccionar un conductor';
     }
     
     if (newViaje.origen && newViaje.origen.length > 50) {
@@ -65,10 +60,15 @@ const CrearViaje = ({ colors, vehiculos, conductores, onCreateViaje, show, onClo
       return;
     }
     
+    const vehiculoSeleccionado = vehiculosActivos.find(
+      (v) => v.id_vehiculo === parseInt(newViaje.id_vehiculo)
+    );
+    const conductorId = vehiculoSeleccionado?.id_conductor || vehiculoSeleccionado?.conductor?.id_conductor || null;
+
     // Preparar los datos para enviar
     const viajeData = {
       id_vehiculo: parseInt(newViaje.id_vehiculo),
-      id_conductor: parseInt(newViaje.id_conductor),
+      id_conductor: conductorId || null,
       fecha_inicio: newViaje.fecha_inicio || null,
       fecha_fin: newViaje.fecha_fin || null,
       origen: newViaje.origen.trim() || 'La Paz',
@@ -83,7 +83,6 @@ const CrearViaje = ({ colors, vehiculos, conductores, onCreateViaje, show, onClo
   const handleClose = () => {
     setNewViaje({
       id_vehiculo: '',
-      id_conductor: '',
       fecha_inicio: '',
       fecha_fin: '',
       origen: 'La Paz',
@@ -106,6 +105,19 @@ const CrearViaje = ({ colors, vehiculos, conductores, onCreateViaje, show, onClo
   
   // Obtener conductores activos
   const conductoresActivos = conductores?.filter(c => c.usuario?.estado === 'activo') || [];
+
+  const vehiculoSeleccionado = vehiculosActivos.find(
+    (v) => v.id_vehiculo === parseInt(newViaje.id_vehiculo)
+  );
+
+  const conductorAsignado = vehiculoSeleccionado
+    ? conductoresActivos.find(
+        (c) => c.conductor?.id_conductor === (vehiculoSeleccionado.id_conductor || vehiculoSeleccionado.conductor?.id_conductor)
+      )
+      || vehiculoSeleccionado.conductor
+    : null;
+  const nombreConductor = conductorAsignado?.usuario?.nombre_completo || conductorAsignado?.nombre_completo || 'No asignado';
+  const conductorDisponible = Boolean(conductorAsignado);
 
   return (
     <Dialog 
@@ -135,7 +147,7 @@ const CrearViaje = ({ colors, vehiculos, conductores, onCreateViaje, show, onClo
       <DialogContent sx={{ pt: 3 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <Alert severity="info" sx={{ borderRadius: 2 }}>
-            Complete la información del viaje. El vehículo y conductor son obligatorios.
+            Complete la información del viaje. El vehículo determina automáticamente el conductor asignado.
           </Alert>
 
           {/* Asignación de Recursos */}
@@ -181,37 +193,24 @@ const CrearViaje = ({ colors, vehiculos, conductores, onCreateViaje, show, onClo
             
             <Grid item xs={12} sm={6}>
               <TextField
-                select
-                label="Conductor"
+                label="Conductor asignado"
                 variant="outlined"
                 fullWidth
-                required
-                value={newViaje.id_conductor}
-                onChange={(e) => handleInputChange('id_conductor', e.target.value)}
-                error={!!errors.id_conductor}
-                helperText={errors.id_conductor || 'Seleccione el conductor del viaje'}
+                value={newViaje.id_vehiculo ? nombreConductor : ''}
+                helperText={
+                  newViaje.id_vehiculo
+                    ? (conductorDisponible ? 'Conductor vinculado al vehículo seleccionado' : 'Este vehículo no tiene conductor asignado')
+                    : 'Seleccione un vehículo para ver el conductor'
+                }
+                InputProps={{ readOnly: true }}
+                disabled={!newViaje.id_vehiculo}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     backgroundColor: colors?.background || '#f9f9f9',
                     borderRadius: '12px'
                   }
                 }}
-              >
-                <MenuItem value="">
-                  <em>Seleccionar conductor</em>
-                </MenuItem>
-                {conductoresActivos.length === 0 ? (
-                  <MenuItem disabled>
-                    <em>No hay conductores activos disponibles</em>
-                  </MenuItem>
-                ) : (
-                  conductoresActivos.map(c => (
-                    <MenuItem key={c.conductor?.id_conductor} value={c.conductor?.id_conductor}>
-                      {c.usuario?.nombre_completo} - Lic: {c.conductor?.licencia}
-                    </MenuItem>
-                  ))
-                )}
-              </TextField>
+              />
             </Grid>
           </Grid>
 
@@ -329,10 +328,10 @@ const CrearViaje = ({ colors, vehiculos, conductores, onCreateViaje, show, onClo
                 Programado
               </Box>
             </MenuItem>
-            <MenuItem value="en_proceso">
+            <MenuItem value="en_ruta">
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'warning.main' }} />
-                En Proceso
+                En ruta
               </Box>
             </MenuItem>
             <MenuItem value="finalizado">
@@ -350,7 +349,7 @@ const CrearViaje = ({ colors, vehiculos, conductores, onCreateViaje, show, onClo
           </TextField>
 
           {/* Resumen de datos */}
-          {newViaje.id_vehiculo && newViaje.id_conductor && (
+          {newViaje.id_vehiculo && conductorDisponible && (
             <Alert severity="success" sx={{ borderRadius: 2 }}>
               <Typography variant="body2">
                 <strong>Resumen:</strong> Viaje de <strong>{newViaje.origen}</strong> a <strong>{newViaje.destino}</strong>
@@ -373,7 +372,7 @@ const CrearViaje = ({ colors, vehiculos, conductores, onCreateViaje, show, onClo
           onClick={handleSubmit}
           variant="contained"
           startIcon={<BusIcon />}
-          disabled={!newViaje.id_vehiculo || !newViaje.id_conductor}
+          disabled={!newViaje.id_vehiculo || (newViaje.id_vehiculo && !conductorDisponible)}
           sx={{
             backgroundColor: colors?.primary || '#1976d2',
             borderRadius: '12px',

@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import db from "../config/Database.js";
+import Roles from "./roles.js";
 
 const { DataTypes } = Sequelize;
 
@@ -79,7 +80,10 @@ const usuarios = db.define('usuarios',{
   },{
     freezeTableName: true
 });
-
+usuarios.belongsTo(Roles, {
+  foreignKey: 'id_rol',
+  as: 'rol' // Ahora puedes hacer user.rol.nombre_rol
+});
 
 export default usuarios;
 
