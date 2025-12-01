@@ -1,5 +1,5 @@
 import Users from "../models/usuarios.js";
-import Roles from "../models/roles.js"; // ✅ 1. IMPORTAR
+import Roles from "../models/roles.js"; //
 import jwt from "jsonwebtoken";
 
 export const refreshToken = async (req, res) => {
@@ -7,7 +7,7 @@ export const refreshToken = async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) return res.sendStatus(401);
 
-    // ✅ 2. AGREGAR INCLUDE PARA TRAER EL ROL
+    //AGREGAR INCLUDE PARA TRAER EL ROL
     const user = await Users.findOne({
       where: { refresh_token: refreshToken },
       include: [{
@@ -22,7 +22,7 @@ export const refreshToken = async (req, res) => {
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
       if (err) return res.sendStatus(403);
 
-      // ✅ 3. DESTRUCTURAR CORRECTAMENTE
+      // DESTRUCTURAR CORRECTAMENTE
       const { 
         id_usuario, 
         nombre_completo, 
@@ -33,7 +33,7 @@ export const refreshToken = async (req, res) => {
         is2FAEnabled 
       } = user;
 
-      // ✅ 4. ACCEDER AL ROL CORRECTAMENTE
+      // ACCEDER AL ROL CORRECTAMENTE
       const accessToken = jwt.sign(
         { 
           id_usuario, 
@@ -43,8 +43,8 @@ export const refreshToken = async (req, res) => {
           email, 
           foto_perfil, 
           is2FAEnabled,
-          rol: {                              // ✅ AHORA SÍ EXISTE
-            id_rol: user.rol.id_rol,          // ✅ user.rol viene del INCLUDE
+          rol: {                             
+            id_rol: user.rol.id_rol,          
             nombre_rol: user.rol.nombre_rol,
             descripcion: user.rol.descripcion
           }

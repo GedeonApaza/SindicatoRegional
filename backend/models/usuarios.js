@@ -82,7 +82,7 @@ const usuarios = db.define('usuarios',{
 });
 usuarios.belongsTo(Roles, {
   foreignKey: 'id_rol',
-  as: 'rol' // Ahora puedes hacer user.rol.nombre_rol
+  as: 'rol' 
 });
 
 export default usuarios;

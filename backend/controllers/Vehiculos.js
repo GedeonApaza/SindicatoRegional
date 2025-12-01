@@ -46,6 +46,24 @@ export const createVehiculo = async (req, res) => {
       estado
     } = req.body;
 
+    // Validar formato de placa
+    const placaRegex = /^[0-9]{4}[A-Z]{3}$/i;
+    if (!placaRegex.test(placa)) {
+      return res.status(400).json({
+        msg: "La placa debe tener el formato: 4 números seguidos de 3 letras (ej. 1234ABC)"
+      });
+    }
+    
+    //validar ano de vehiculo
+    const anioActual = new Date().getFullYear();
+    const anioMinimo = anioActual - 80; 
+
+    if (anio < anioMinimo || anio > anioActual) {
+      return res.status(400).json({
+        msg: `El año del vehículo debe estar entre ${anioMinimo} y ${anioActual}`
+      });
+    }
+
     const newVehiculo = await Vehiculos.create({
       placa,
       marca,
@@ -57,6 +75,7 @@ export const createVehiculo = async (req, res) => {
     });
 
     res.status(201).json(newVehiculo);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Error al crear el vehículo" });

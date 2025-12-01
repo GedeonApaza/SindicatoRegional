@@ -89,7 +89,7 @@ export const createPasajeroViaje = async (req, res) => {
     } else if (totalActual === vehiculo.capacidad_pasajeros) {
       // Ya se llenaron todos los asientos
   const now = new Date();
-  const horaActual = now.toTimeString().slice(0,5); // "HH:MM"
+  const horaActual = now.toTimeString().slice(0,5); 
   
       await viaje.update({ estado: "en_ruta",
         hora_salida: horaActual 

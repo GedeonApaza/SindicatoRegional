@@ -19,7 +19,7 @@ const conductores = db.define('conductores',{
       }
     },
     licencia: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.INTEGER,
       allowNull: false
     },
     fecha_vencimiento_licencia: {
@@ -27,11 +27,11 @@ const conductores = db.define('conductores',{
       allowNull: true
     },
     celular: {
-      type: DataTypes.STRING(15),
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     contacto_emergencia: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.INTEGER,
       allowNull: true
     },
     fecha_ingreso: {

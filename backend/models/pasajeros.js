@@ -11,7 +11,7 @@ const pasajeros = db.define('pasajeros',{
       primaryKey: true
     },
     ci: {
-      type: DataTypes.STRING(15),
+      type: DataTypes.INTEGER,
       allowNull: false,
       unique: "ci"
     },
@@ -24,7 +24,7 @@ const pasajeros = db.define('pasajeros',{
       allowNull: true
     },
     apellido_materno: {
-      type: DataTypes.STRING(15),
+      type: DataTypes.STRING(50),
       allowNull: true
     }
   },{

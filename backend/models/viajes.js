@@ -37,12 +37,10 @@ const viajes = db.define('viajes',{
     origen: {
       type: DataTypes.STRING(50),
       allowNull: true,
-      defaultValue: "La Paz"
     },
     destino: {
       type: DataTypes.STRING(50),
       allowNull: true,
-      defaultValue: "Caranavi"
     },
     estado: {
       type: DataTypes.ENUM('programado','en_ruta','finalizado','cancelado'),

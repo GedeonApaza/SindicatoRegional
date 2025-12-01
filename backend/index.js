@@ -28,7 +28,7 @@ const swaggerOptions = {
       { url: "http://localhost:5000" }
     ]
   },
-  apis: ["./routes/*.js"] // <-- aquí Swagger leerá tus rutas y comentarios
+  apis: ["./routes/*.js"] 
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);

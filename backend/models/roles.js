@@ -16,7 +16,7 @@ const roles = db.define('roles',{
       unique: "nombre_rol"
     },
     descripcion: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(100),
       allowNull: true
     }
   },{

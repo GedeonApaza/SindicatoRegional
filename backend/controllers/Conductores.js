@@ -2,6 +2,8 @@ import Users from "../models/usuarios.js";
 import Conductores from "../models/conductores.js";
 
 import bcrypt from "bcrypt";
+
+//registrar conductor
 export const registerConductor = async (req, res) => {
   const {
     ci,
@@ -21,6 +23,48 @@ export const registerConductor = async (req, res) => {
 
   if (password !== confPassword) {
     return res.status(400).json({ msg: "Password y Confirm Password no coinciden" });
+  }
+  // Validar formato de celular y contacto emergencia
+  const celularRegex = /^[67][0-9]{7}$/;
+
+  if (!celularRegex.test(celular)) {
+    return res.status(400).json({ msg: "El número de celular debe iniciar en 6 o 7 y tener 8 dígitos" });
+  }
+
+  if (!celularRegex.test(contacto_emergencia)) {
+    return res.status(400).json({ msg: "El número de contacto de emergencia debe iniciar en 6 o 7 y tener 8 dígitos" });
+  }
+
+  // Validar que la licencia tenga máximo 7 caracteres
+  if (licencia.length > 7) {
+    return res.status(400).json({
+      msg: "La licencia no puede tener más de 7 caracteres"
+    });
+  }
+
+  // Validar fecha de vencimiento entre 6 meses y 1 año
+  const hoy = new Date();
+
+  const minimo = new Date();
+  minimo.setMonth(minimo.getMonth() + 6);
+  
+  const maximo = new Date();
+  maximo.setFullYear(maximo.getFullYear() + 1);
+
+  const fechaLicencia = new Date(fecha_vencimiento_licencia);
+
+  if (fechaLicencia < minimo || fechaLicencia > maximo) {
+    return res.status(400).json({
+      msg: "La licencia debe vencer entre 6 meses y 1 año desde la fecha actual"
+    });
+  }
+  // Validar fecha de ingreso (no puede ser futura)
+  const fechaIngresoDate = new Date(fecha_ingreso);
+
+  if (fechaIngresoDate > hoy) {
+    return res.status(400).json({
+      msg: "La fecha de ingreso no puede ser mayor a la fecha actual"
+    });
   }
 
   try {
