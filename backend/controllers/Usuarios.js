@@ -102,21 +102,21 @@ export const getUsers = async (req, res) => {
         'apellido_paterno',
         'apellido_materno',
         'email',
-        'foto_perfil',        // ✅ Agregar si la usas
+        'foto_perfil',        
         'id_rol',
         'estado',
-        'is2FAEnabled',       // ✅ Agregar si la usas
-        'fecha_creacion',     // ✅ Para mostrar en el modal
+        'is2FAEnabled',     
+        'fecha_creacion',     
         'fecha_modificacion',
         'fecha_eliminacion'
       ],
-      // ✅ 2. AGREGAR INCLUDE para traer el ROL completo
+      // 2. AGREGAR INCLUDE para traer el ROL completo
       include: [{
         model: Roles,
-        as: 'rol',  // ✅ IMPORTANTE: Debe coincidir con el alias en el modelo
+        as: 'rol', 
         attributes: ['id_rol', 'nombre_rol', 'descripcion']
       }],
-      order: [['fecha_creacion', 'DESC']] // ✅ Opcional: ordenar por más recientes
+      order: [['fecha_creacion', 'DESC']] 
     });
     
     res.status(200).json(users);
@@ -129,9 +129,15 @@ export const getUsers = async (req, res) => {
 // REGISTRO DE USUARIO CON FOTO
 export const Register = async (req, res) => {
   const { ci, nombre_completo, apellido_paterno, apellido_materno, email, password, confPassword, id_rol, estado } = req.body;
+  
+  // Validación CI (7 a 8 dígitos)
+  const ciRegex = /^[0-9]{7,8}$/;
+  if (!ciRegex.test(ci)) {
+    return res.status(400).json({ msg: "El CI debe contener solo números y tener entre 7 y 8 dígitos" });
+  }
 
   if (password !== confPassword) {
-    return res.status(400).json({ msg: "Password and Confirm Password do not match" });
+    return res.status(400).json({ msg: "Password y Confirm Password no coinciden" });
   }
 
   try {
@@ -156,13 +162,30 @@ export const Register = async (req, res) => {
       foto_perfil
     });
 
-    res.status(201).json({ msg: "Usuario registrado exitosamente" });
+    return res.status(201).json({ msg: "Usuario registrado exitosamente" });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ msg: "Error al crear usuario" });
+
+    //  Capturar error de unique de las columnas Carnet y email
+    if (error.name === "SequelizeUniqueConstraintError") {
+      const campo = error.errors[0].path; 
+
+      if (campo === "ci") {
+        return res.status(400).json({ msg: "El CI ya está registrado" });
+      }
+      if (campo === "email") {
+        return res.status(400).json({ msg: "El correo ya está registrado" });
+      }
+
+      return res.status(400).json({ msg: "Dato duplicado" });
+    }
+
+    return res.status(500).json({ msg: "Error al crear usuario" });
   }
 };
-//modificar
+
+
 // ACTUALIZAR USUARIO
 export const updateUser = async (req, res) => {
   try {
@@ -198,7 +221,7 @@ export const updateUser = async (req, res) => {
     res.status(500).json({ msg: "Error al actualizar usuario" });
   }
 };
-//eliminar
+
 // DESACTIVAR USUARIO (NO SE BORRA, SOLO CAMBIA ESTADO)
 export const deleteUser = async (req, res) => {
   try {
@@ -264,10 +287,15 @@ export const Login = async (req, res) => {
   try {
     const user = await Users.findOne({ where: { email: req.body.email },      include: [{
         model: Roles,
-        as: 'rol', // ✅ AHORA PUEDES HACER: user.rol.nombre_rol
+        as: 'rol', 
         attributes: ['id_rol', 'nombre_rol', 'descripcion'] // Solo lo que necesitas
       }] });
     if (!user) return res.status(404).json({ msg: "Email no encontrado" });
+
+    // Verificar si el usuario está inactivo
+    if (user.estado === 'inactivo') {
+      return res.status(403).json({ msg: "Usuario desactivado. Contacte con el administrador" });
+    }
 
     const match = await bcrypt.compare(req.body.password, user.password);
     if (!match) return res.status(400).json({ msg: "Contraseña incorrecta" });
@@ -283,7 +311,7 @@ export const Login = async (req, res) => {
     const accessToken = jwt.sign(
       { id_usuario: user.id_usuario, nombre_completo:user.nombre_completo,apellido_paterno:user.apellido_paterno, apellido_materno: user.apellido_materno , email: user.email,         rol: {
           id_rol: user.rol.id_rol,
-          nombre_rol: user.rol.nombre_rol, // ✅ COMO LARAVEL!
+          nombre_rol: user.rol.nombre_rol,
           descripcion: user.rol.descripcion
         },foto_perfil:user.foto_perfil },
       process.env.ACCESS_TOKEN_SECRET,
